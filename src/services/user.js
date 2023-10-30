@@ -15,7 +15,7 @@ export default{
       },
 
       select: () => {
-        return http.get("book/getSelect");
+        return http.get("user/getSelect");
       },
 
 

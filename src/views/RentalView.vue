@@ -26,6 +26,17 @@
         itemsPerPageText: 'Linhas por página',
       }"
     >
+      <template v-slot:[`item.rentalDate`]="{ item }">
+        <td>{{ item.rentalDate | formatDate }}</td>
+      </template>
+      <template v-slot:[`item.previewDate`]="{ item }">
+        <td>{{ item.previewDate | formatDate }}</td>
+      </template>
+      <template v-slot:[`item.returnDate`]="{ item }">
+            <td v-if="item.returnDate != null">
+              {{ item.returnDate | formatDate }}
+            </td>
+      </template>
       <template v-slot:top>
         <v-toolbar flat>
           <v-toolbar-title>
@@ -38,6 +49,7 @@
                 Adicionar Aluguel
               </v-btn>
             </template>
+
             <v-form ref="RentalForm" @submit.prevent="save">
               <v-card>
                 <v-card-title>
@@ -64,7 +76,7 @@
                       v-model="rental.user"
                       :items="usersList"
                       item-value="id"
-                      item-text="nome"
+                      item-text="name"
                       prepend-icon="mdi-account-circle"
                     ></v-select>
                     <v-row class="my-3">
@@ -95,7 +107,7 @@
                 <v-card-actions>
                   <v-spacer></v-spacer>
                   <v-btn text color="error" @click="close"> Fechar </v-btn>
-                  <v-btn text color="primary" @click="addRental"> Feito </v-btn>
+                  <v-btn text color="primary" @click="save"> Feito </v-btn>
                 </v-card-actions>
               </v-card>
             </v-form>
@@ -138,6 +150,16 @@ import User from "../services/user";
 import Book from "../services/book";
 import Rental from "../services/rental";
 export default {
+  filters: {
+    formatDate: function (value) {
+      if (value) {
+        const date = new Date(value);
+        return date.toLocaleDateString("pt-BR"); // ou qualquer outro formato desejado
+      }
+      return "";
+    },
+  },
+
   data() {
     return {
       usersList: [],
@@ -148,6 +170,9 @@ export default {
       pageSize: 5,
       orderByProperty: "id",
       desc: false,
+      rentalDate: null,
+      previewDate: null,
+      returnDate: null,
       loadingTable: true,
       formIsValid: false,
       rulesNumber: [(value) => !!value || "Campo Obrigatório"],
@@ -163,13 +188,14 @@ export default {
         { text: "Ações", value: "actions", sortable: false },
       ],
       rentals: [],
+
       rental: {
-        id: 0 ,
-        book: 0 , 
-        user: 0 ,
-        rentalDate : "",
-        previewDate : "",
-        returnDate: "",
+        id: 0,
+        book: 0,
+        user: 0,
+        rentalDate: null,
+        previewDate: null,
+        returnDate: null,
         status: "",
       },
       errors: [],
@@ -208,7 +234,7 @@ export default {
     statusClass(item) {
       if (item.status == "Atrasado") {
         return "red";
-      } else if (item.status == "No Prazo") {
+      } else if (item.status == "No prazo") {
         return "green";
       } else {
         return "yellow";

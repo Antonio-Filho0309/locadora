@@ -2,20 +2,23 @@ import {http} from './config'
 
 export default{
 
-    list:() => {
-        return http.get("alugueis")
+    list:(params) => {
+        return http.get("rental/paged", {
+          params : {
+            Page: params.Page,
+            PageSize: params.PageSize,
+            OrderByProperty: params.OrderByProperty,
+            Desc: params.Desc,
+            Search: params.Search,
+          }
+        })
       },
 
-    save:(aluguel)=>{
-      return http.post("aluguel", aluguel)
+    save:(rental)=>{
+      return http.post("rental", rental)
     },
 
-    update:(aluguel)=> {
-      return http.put("aluguel", aluguel)
+    update:(rental)=> {
+      return http.put(`rental/${rental.id}`, rental)
     },
-
-    delete:(aluguel) => {
-      return http.delete ("aluguel", {data: aluguel})
-    }
-
 }
