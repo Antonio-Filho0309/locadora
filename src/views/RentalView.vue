@@ -33,9 +33,9 @@
         <td>{{ item.previewDate | formatDate }}</td>
       </template>
       <template v-slot:[`item.returnDate`]="{ item }">
-            <td v-if="item.returnDate != null">
-              {{ item.returnDate | formatDate }}
-            </td>
+        <td v-if="item.returnDate != null">
+          {{ item.returnDate | formatDate }}
+        </td>
       </template>
       <template v-slot:top>
         <v-toolbar flat>
@@ -85,7 +85,7 @@
                           disabled
                           label="Data do Aluguel"
                           hide-details="auto"
-                          v-model="rentalDate"
+                          v-model="rental.rentalDate"
                           type="date"
                         >
                         </v-text-field>
@@ -96,7 +96,7 @@
                           :rules="rulesNumber"
                           hide-details="auto"
                           required
-                          v-model="previewDate"
+                          v-model="rental.previewDate"
                           type="date"
                         >
                         </v-text-field>
@@ -132,14 +132,6 @@
         >
           <v-icon class="green--text">mdi-book</v-icon>
         </v-btn>
-        <v-btn
-          v-if="item.status == 'Pendente'"
-          text
-          small
-          @click="deleteItem(item)"
-        >
-          <v-icon class="error--text">mdi-delete</v-icon>
-        </v-btn>
       </template>
     </v-data-table>
   </v-card>
@@ -154,7 +146,7 @@ export default {
     formatDate: function (value) {
       if (value) {
         const date = new Date(value);
-        return date.toLocaleDateString("pt-BR"); // ou qualquer outro formato desejado
+        return date.toLocaleDateString("pt-BR");
       }
       return "";
     },
@@ -170,8 +162,8 @@ export default {
       pageSize: 5,
       orderByProperty: "id",
       desc: false,
-      rentalDate: null,
-      previewDate: null,
+      rentalDate: new Date().toISOString().substr(0, 10),
+      previewDate: "",
       returnDate: null,
       loadingTable: true,
       formIsValid: false,
@@ -193,9 +185,9 @@ export default {
         id: 0,
         book: 0,
         user: 0,
-        rentalDate: null,
-        previewDate: null,
-        returnDate: null,
+        rentalDate: new Date().toISOString().substr(0, 10),
+        previewDate: "",
+        returnDate: "",
         status: "",
       },
       errors: [],
@@ -227,7 +219,7 @@ export default {
 
   methods: {
     resetValidation() {
-      this.$refs.AluguelForm.resetValidation();
+      this.$refs.RentalForm.resetValidation();
     },
 
     /*para dizer a cor do status*/
@@ -306,7 +298,7 @@ export default {
     },
 
     checkFormValidity() {
-      this.formIsValid = this.$refs.AluguelForm.validate();
+      this.formIsValid = this.$refs.RentalForm.validate();
     },
 
     // Listar
@@ -328,13 +320,13 @@ export default {
       });
     },
 
-    devolver(aluguel) {
-      if (aluguel.data_devolucao == "Não devolvido") {
-        this.selectedAlugId = aluguel.id;
-        this.livro_id = aluguel.livro_id;
-        this.usuario_id = aluguel.usuario_id;
-        this.data_aluguel_temp = aluguel.data_aluguel;
-        this.data_previsao = aluguel.data_previsao;
+    devolver(rental) {
+      if (rental.previewDate == "Não devolvido") {
+        this.id = rental.id;
+        this.userId = rental.userId;
+        this.bookId = rental.usuario_id;
+        this.rentalDate = rental.rentalDate;
+        this.previewDate = rental.previewDate;
         this.confirmDevol();
       } else {
         Swal.fire("O livro já foi devolvido!", "", "error");
@@ -342,142 +334,61 @@ export default {
     },
 
     confirmDevol() {
-      const selectedLivro = this.livros.find(
-        (livro) => livro.nome === this.livro_id
-      );
-      const selectedUsuario = this.usuarios.find(
-        (usuario) => usuario.nome === this.usuario_id
-      );
-
       const RentalDevo = {
-        id: this.selectedAlugId,
-        livro_id: selectedLivro ? { ...selectedLivro } : this.livro_id,
-        usuario_id: selectedUsuario ? { ...selectedUsuario } : this.usuario_id,
-        data_aluguel: this.parseDate(this.data_aluguel_temp),
-        data_previsao: this.parseDate(this.data_previsao),
-        data_devolucao: new Date().toISOString().substr(0, 10),
-        status: "No Prazo",
+       id: this.rental.id,
+       returnDate: this.rental.returnDate,
       };
-      Rental.update(RentalDevo).then(() => {
-        this.alugueis = this.alugueis.map((aluguel) => {
-          if (this.selectedALugId === RentalDevo.id) {
-            return RentalDevo;
-          } else {
-            return aluguel;
-          }
-        });
+      
+
+      Rental.update(RentalDevo).then((response) => {
         Swal.fire({
           icon: "success",
-          title: "Devolução realizada com sucesso!",
+          title: response.data.message,
           showConfirmButton: false,
           timer: 2000,
         });
+        console.log(RentalDevo);
         this.list();
         this.zerar();
         this.resetValidation();
       });
     },
 
-    removerAluguel(aluguelId) {
-      this.alugueis = this.alugueis.filter(
-        (aluguel) => aluguel.id !== aluguelId
-      );
-    },
-
-    deleteItem(aluguel) {
-      Swal.fire({
-        icon: "warning",
-        title: "Deseja excluir o aluguel?",
-        text: "Essa ação não pode ser desfeita!",
-        showCancelButton: true,
-        confirmButtonText: "Sim",
-        cancelButtonText: "Não",
-        confirmButtonColor: "#3085d6",
-        cancelButtonColor: "#d33",
-      }).then((result) => {
-        if (result.isConfirmed) {
-          const selectedBook = this.livros.find(
-            (livro) => livro.nome === aluguel.livro_id
-          );
-
-          const selectedUser = this.usuarios.find(
-            (usuario) => usuario.nome === aluguel.usuario_id
-          );
-
-          const deleteAlug = {
-            id: aluguel.id,
-            livro_id: selectedBook,
-            usuario_id: selectedUser,
-            data_aluguel: this.parseDate(aluguel.data_aluguel),
-            data_previsao: this.parseDate(aluguel.data_previsao),
-            data_devolucao:
-              aluguel.data_devolucao !== "Não devolvido"
-                ? aluguel.data_devolucao
-                : null,
-          };
-
-          Rental.delete(deleteAlug)
-            .then(() => {
-              Swal.fire({
-                icon: "success",
-                title: "Aluguel excluído com sucesso!",
-                showConfirmButton: false,
-                timer: 2000,
-              });
-              this.removerAluguel(deleteAlug.id);
-              this.close();
-              this.list();
-              this.zerar();
-              this.resetValidation();
-            })
-            .catch((error) => {
-              Swal.fire({
-                icon: "error",
-                title: "Erro ao excluir Aluguel",
-                text: error.response.data.error,
-                showConfirmButton: false,
-                timer: 3000,
-              });
-            });
-        }
-      });
-    },
     close() {
       this.dialog = false;
       this.zerar();
     },
-    isLivroDisponivel(livro) {
-      return livro.quantidade > 0;
-    },
 
     save() {
-      const selectedLivro = this.livros.find(
-        (livro) => livro.nome === this.livro_id
-      );
-      const selectedUsuario = this.usuarios.find(
-        (usuario) => usuario.nome === this.usuario_id
-      );
       const newRental = {
-        livro_id: selectedLivro,
-        usuario_id: selectedUsuario,
-        data_aluguel: this.data_aluguel,
-        data_previsao: this.data_previsao,
-        status: "Pendente",
+        bookId: this.rental.book,
+        userId: this.rental.user,
+        rentalDate: this.rental.rentalDate,
+        previewDate: this.rental.previewDate,
       };
 
-      Rental.save(newRental).then((response) => {
-        this.alugueis.push({ id: response.data.id, ...newRental });
-        Swal.fire({
-          icon: "success",
-          title: "Aluguel cadastrado com sucesso!",
-          showConfirmButton: false,
-          timer: 2000,
+      Rental.save(newRental)
+        .then((response) => {
+          Swal.fire({
+            icon: "success",
+            title: response.data.message,
+            showConfirmButton: false,
+            timer: 2000,
+          });
+          this.list();
+          this.close();
+          this.zerar();
+          this.resetValidation();
+        }).catch ((error) => {
+           console.log(error.response.data.message);
+            Swal.fire({
+              icon: "error",
+              title: "Erro ao cadastrar livro",
+              text: error.response.data.message,
+              showConfirmButton: false,
+              timer: 3000,
         });
-        this.list();
-        this.close();
-        this.zerar();
-        this.resetValidation();
-      });
+        });
     },
 
     addAluguel() {
@@ -487,10 +398,10 @@ export default {
       }
     },
     zerar() {
-      this.livro_id = "";
-      this.usuario_id = "";
-      this.data_previsao = "";
-      this.data_aluguel = new Date().toISOString().substr(0, 10);
+      this.bookId = "";
+      this.userId = "";
+      this.rental.previewDate = "";
+      this.rental.rentalDate = new Date().toISOString().substr(0, 10);
     },
   },
 };

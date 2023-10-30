@@ -334,8 +334,6 @@ export default {
           quantity: this.book.quantity,
           rented: 0,
         };
-        console.log(this.book.publisher);
-        console.log(createBook);
         Book.save(createBook)
           .then((response) => {
             Swal.fire({
