@@ -23,7 +23,7 @@
 </template>
 
 <script>
-import Aluguel from "../services/aluguel";
+import Aluguel from "../services/rental";
 
 export default {
   name: "BooksRentedByUserTable",

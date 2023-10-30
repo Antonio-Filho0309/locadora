@@ -80,7 +80,7 @@
 <script>
 import Table from "../components/Table";
 import LineChart from "../components/LineChart";
-import Aluguel from "../services/aluguel";
+import Aluguel from "../services/rental";
 import Livro from "../services/book";
 import Usuario from "../services/user";
 import Editora from "../services/publisher";

@@ -12,12 +12,17 @@
 
     <v-data-table
       :headers="headers"
-      :items="filteredRentals"
+      :items="rentals"
       :search="search"
+      :loading="loadingTable"
+      loading-text="Carregando..."
+      :server-items-length="total"
+      @update:options="handleOptionsUpdate"
       class="elevation-1"
-      :items-per-page="page"
+      :items-per-page="pageSize"
+      :page="page"
       :footer-props="{
-        itemsPerPageOptions: [5, 10, 25, this.alugueis.length],
+        itemsPerPageOptions: [5, 10, 25, this.total],
         itemsPerPageText: 'Linhas por página',
       }"
     >
@@ -33,7 +38,7 @@
                 Adicionar Aluguel
               </v-btn>
             </template>
-            <v-form ref="AluguelForm" @submit.prevent="save">
+            <v-form ref="RentalForm" @submit.prevent="save">
               <v-card>
                 <v-card-title>
                   <span class="text-h5">{{ formTitle }}</span>
@@ -45,9 +50,10 @@
                       :rules="rulesNumber"
                       hide-details="auto"
                       required
-                      v-model="livro_id"
-                      :items="livros"
-                      item-text="nome"
+                      v-model="rental.book"
+                      :items="booksList"
+                      item-text="name"
+                      item-value="id"
                       prepend-icon="mdi-book"
                     ></v-select>
                     <v-select
@@ -55,8 +61,9 @@
                       :rules="rulesNumber"
                       hide-details="auto"
                       required
-                      v-model="usuario_id"
-                      :items="usuarios"
+                      v-model="rental.user"
+                      :items="usersList"
+                      item-value="id"
                       item-text="nome"
                       prepend-icon="mdi-account-circle"
                     ></v-select>
@@ -66,7 +73,7 @@
                           disabled
                           label="Data do Aluguel"
                           hide-details="auto"
-                          v-model="data_aluguel"
+                          v-model="rentalDate"
                           type="date"
                         >
                         </v-text-field>
@@ -77,7 +84,7 @@
                           :rules="rulesNumber"
                           hide-details="auto"
                           required
-                          v-model="data_previsao"
+                          v-model="previewDate"
                           type="date"
                         >
                         </v-text-field>
@@ -88,9 +95,7 @@
                 <v-card-actions>
                   <v-spacer></v-spacer>
                   <v-btn text color="error" @click="close"> Fechar </v-btn>
-                  <v-btn text color="primary" @click="addAluguel">
-                    Feito
-                  </v-btn>
+                  <v-btn text color="primary" @click="addRental"> Feito </v-btn>
                 </v-card-actions>
               </v-card>
             </v-form>
@@ -131,39 +136,42 @@
 import Swal from "sweetalert2";
 import User from "../services/user";
 import Book from "../services/book";
-import Aluguel from "../services/aluguel";
+import Rental from "../services/rental";
 export default {
   data() {
     return {
+      usersList: [],
+      booksList: [],
       search: "",
-      pagination: {
-        rowsPerPage: 5,
-      },
+      total: 0,
+      page: 1,
+      pageSize: 5,
+      orderByProperty: "id",
+      desc: false,
+      loadingTable: true,
       formIsValid: false,
-
       rulesNumber: [(value) => !!value || "Campo Obrigatório"],
       dialog: false,
       headers: [
         { text: "ID", value: "id" },
-        { text: "Livro", value: "livro_id" },
-        { text: "Usuário", value: "usuario_id" },
-        { text: "Data do Aluguel", value: "data_aluguel" },
-        { text: "Previsão de Devolução", value: "data_previsao" },
-        { text: "Data de Devolução", value: "data_devolucao" },
+        { text: "Livro", value: "book.name" },
+        { text: "Usuário", value: "user.name" },
+        { text: "Data do Aluguel", value: "rentalDate" },
+        { text: "Previsão de Devolução", value: "previewDate" },
+        { text: "Data de Devolução", value: "returnDate" },
         { text: "Status", value: "status", align: "center", sortable: false },
         { text: "Ações", value: "actions", sortable: false },
       ],
-
-      alugueis: [],
-      livros: [],
-      usuarios: [],
-      livro_id: "",
-      usuario_id: "",
-      data_aluguel: new Date().toISOString().substr(0, 10),
-      data_previsao: "",
-      data_devolucao: "",
-      status: "",
-      selectedAlugId: null,
+      rentals: [],
+      rental: {
+        id: 0 ,
+        book: 0 , 
+        user: 0 ,
+        rentalDate : "",
+        previewDate : "",
+        returnDate: "",
+        status: "",
+      },
       errors: [],
       editedIndex: -1,
     };
@@ -171,30 +179,23 @@ export default {
 
   mounted() {
     this.list();
+    this.listUsers();
+    this.listBooks();
   },
 
   computed: {
     formTitle() {
       return this.editedIndex === -1 ? "Adicionar Aluguel" : "Editar Aluguel";
     },
-
-    filteredRentals() {
-      const searchValue = this.search.toLowerCase();
-      return this.alugueis.filter((aluguel) => {
-        for (const prop in aluguel) {
-          const propValue = aluguel[prop].toString().toLowerCase();
-          if (propValue.includes(searchValue)) {
-            return true;
-          }
-        }
-        return false;
-      });
-    },
   },
 
   watch: {
     dialog(val) {
       if (!val) this.close();
+    },
+
+    search: function () {
+      this.list();
     },
   },
 
@@ -214,20 +215,68 @@ export default {
       }
     },
 
-    /*fomatar as datas para o padrão */
-    formatDate(dateString) {
-      const utcDate = new Date(dateString);
-      const localDate = new Date(
-        utcDate.getTime() + utcDate.getTimezoneOffset() * 60000
-      );
-      return localDate.toLocaleDateString("pt-BR");
+    handleOptionsUpdate(options) {
+      const sortByMapping = {
+        id: "Id",
+        book: "Book",
+        user: "User",
+        rentalDate: "RentalDate",
+        previewDate: "PreviewDate",
+        returnDate: "ReturnDate",
+        status: "Status",
+      };
+      if (options.sortBy[0] || options.sortDesc[0]) {
+        this.orderByProperty = sortByMapping[options.sortBy[0]];
+        this.desc = options.sortDesc[0];
+      } else {
+        this.orderByProperty = "Id";
+        this.desc = false;
+      }
+      this.pageSize = options.itemsPerPage;
+      this.page = options.page;
+      this.total = options.itemsPerPage;
+      this.itemsPerPage = options.itemsPerPage;
+      this.list();
     },
 
-    parseDate(date) {
-      if (!date) return null;
+    async list() {
+      try {
+        const response = await Rental.list({
+          Page: this.page,
+          PageSize: this.pageSize,
+          OrderByProperty: this.orderByProperty,
+          Desc: this.desc,
+          Search: this.search,
+        });
+        this.rentals = response.data.data;
+        this.total = response.data.totalRegisters;
+      } catch (error) {
+        console.log("Erro ao Listar: ", error);
+        if (error.response.status == 404) {
+          this.rentals = [];
+          console.log(error.response.data.message);
+        }
+      } finally {
+        this.loadingTable = false;
+      }
+    },
 
-      const [day, month, year] = date.split("/");
-      return `${year}-${month}-${day}`;
+    async listUsers() {
+      try {
+        const response = await User.select();
+        this.usersList = response.data.data;
+      } catch (error) {
+        console.error("Erro ao buscar usuários", error);
+      }
+    },
+
+    async listBooks() {
+      try {
+        const response = await Book.select();
+        this.booksList = response.data.data;
+      } catch (error) {
+        console.error("Erro ao buscar usuários", error);
+      }
     },
 
     checkFormValidity() {
@@ -235,60 +284,6 @@ export default {
     },
 
     // Listar
-    async list() {
-      try {
-        const [booksResponse, rentalsResponse, usersResponse] =
-          await Promise.all([Book.list(), Aluguel.list(), User.list()]);
-
-        this.livros = booksResponse.data.map((livro) => ({
-          id: livro.id,
-          nome: livro.nome,
-        }));
-
-        this.usuarios = usersResponse.data.map((usuario) => ({
-          id: usuario.id,
-          nome: usuario.nome,
-        }));
-
-        this.alugueis = rentalsResponse.data.map((aluguel) => {
-          const devolucaoDate = aluguel.data_devolucao;
-          const previsaoDate = aluguel.data_previsao;
-          let statusInfo;
-          if (devolucaoDate !== null) {
-            if (devolucaoDate > previsaoDate) {
-              statusInfo = "Atrasado";
-            } else {
-              statusInfo = "No Prazo";
-            }
-          } else {
-            statusInfo = "Pendente";
-          }
-          return {
-            id: aluguel.id,
-            livro_id: aluguel.livro_id.nome,
-            usuario_id: aluguel.usuario_id.nome,
-            data_aluguel: this.formatDate(aluguel.data_aluguel),
-            data_previsao: this.formatDate(aluguel.data_previsao),
-            data_devolucao: aluguel.data_devolucao
-              ? this.formatDate(aluguel.data_devolucao)
-              : "Não devolvido",
-            status: statusInfo,
-          };
-        });
-        // Pendentes primeiro
-        this.alugueis.sort((a, b) => {
-          if (a.status === "Pendente" && b.status !== "Pendente") {
-            return -1;
-          } else if (a.status !== "Pendente" && b.status === "Pendente") {
-            return 1;
-          } else {
-            return 0;
-          }
-        });
-      } catch (error) {
-        console.error("Erro ao buscar informações:", error);
-      }
-    },
 
     devolItem(item) {
       Swal.fire({
@@ -337,7 +332,7 @@ export default {
         data_devolucao: new Date().toISOString().substr(0, 10),
         status: "No Prazo",
       };
-      Aluguel.update(RentalDevo).then(() => {
+      Rental.update(RentalDevo).then(() => {
         this.alugueis = this.alugueis.map((aluguel) => {
           if (this.selectedALugId === RentalDevo.id) {
             return RentalDevo;
@@ -375,7 +370,6 @@ export default {
         cancelButtonColor: "#d33",
       }).then((result) => {
         if (result.isConfirmed) {
-
           const selectedBook = this.livros.find(
             (livro) => livro.nome === aluguel.livro_id
           );
@@ -396,7 +390,7 @@ export default {
                 : null,
           };
 
-          Aluguel.delete(deleteAlug)
+          Rental.delete(deleteAlug)
             .then(() => {
               Swal.fire({
                 icon: "success",
@@ -445,7 +439,7 @@ export default {
         status: "Pendente",
       };
 
-      Aluguel.save(newRental).then((response) => {
+      Rental.save(newRental).then((response) => {
         this.alugueis.push({ id: response.data.id, ...newRental });
         Swal.fire({
           icon: "success",

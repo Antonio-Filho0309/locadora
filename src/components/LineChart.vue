@@ -11,7 +11,7 @@
 
 <script>
 import Chart from "chart.js";
-import Aluguel from "../services/aluguel";
+import Aluguel from "../services/rental";
 
 export default {
   data: () => ({

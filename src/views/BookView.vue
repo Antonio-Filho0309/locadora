@@ -15,7 +15,7 @@
       :items="books"
       :search="search"
       :loading="loadingTable"
-      loading-text="Carregando"
+      loading-text="Carregando..."
       :server-items-length="total"
       @update:options="handleOptionsUpdate"
       class="elevation-1"
@@ -97,7 +97,7 @@
                 <v-card-actions>
                   <v-spacer></v-spacer>
                   <v-btn text color="error" @click="close"> Fechar </v-btn>
-                  <v-btn text color="primary" @click="addLivro"> Feito </v-btn>
+                  <v-btn text color="primary" @click="addBook"> Feito </v-btn>
                 </v-card-actions>
               </v-card>
             </v-form>
@@ -285,10 +285,10 @@ export default {
       }).then((result) => {
         if (result.isConfirmed) {
           Book.delete(book)
-            .then(() => {
+            .then((response) => {
               Swal.fire({
                 icon: "success",
-                title: "Livro excluído com sucesso!",
+                title: response.data.message,
                 showConfirmButton: false,
                 timer: 2000,
               });
@@ -367,10 +367,10 @@ export default {
           quantity: this.book.quantity,
         };
         Book.update(editBook)
-          .then(() => {
+          .then((response) => {
             Swal.fire({
               icon: "success",
-              title: "Livro atualizado com sucesso!",
+              title: response.data.message,
               showConfirmButton: false,
               timer: 2000,
             });
@@ -391,7 +391,7 @@ export default {
       }
     },
 
-    addLivro() {
+    addBook() {
       this.checkFormValidity();
       if (this.formIsValid) {
         this.save();

@@ -1,11 +1,11 @@
 <template>
   <v-app>
     <NavBar />
-    <v-content class="ma-4">
+    <v-main class="ma-4">
       <router-view> 
         
       </router-view>
-    </v-content>
+    </v-main>
     <FooTer />
   </v-app>
 </template>

@@ -14,6 +14,11 @@ export default{
         })
       },
 
+      select: () => {
+        return http.get("book/getSelect");
+      },
+
+
     save:(user)=>{
       return http.post("user", user)
     },
