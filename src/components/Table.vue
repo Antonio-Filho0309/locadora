@@ -23,7 +23,7 @@
 </template>
 
 <script>
-import Aluguel from "../services/rental";
+import Rental from "../services/rental";
 
 export default {
   name: "BooksRentedByUserTable",
@@ -43,35 +43,40 @@ export default {
     },
     limitedUserBookCounts() {
       return this.filteredUserBookCounts.slice(0, this.maxDisplayedUsers);
+      
     },
   },
-  methods: {
-    fetchUserBookCounts() {
-  try {
-    Aluguel.list().then((response) => {
-      const userBookCountMap = {};
+ methods: {
+  async fetchUserBookCounts() {
+    try {
+      const response = await Rental.listDash();
 
-      response.data.forEach((aluguel) => {
-        const userId = aluguel.usuario_id.nome;
-        if (userBookCountMap[userId]) {
-          userBookCountMap[userId]++;
-        } else {
-          userBookCountMap[userId] = 1;
-        }
-      });
 
-      // Transforma o objeto em um array de pares [usuário, total]
-      this.userBookCounts = Object.entries(userBookCountMap);
+      if (Array.isArray(response.data.data)) {
+        const userBookCountMap = {};
 
-      // Ordena o array pelo total de livros alugados (segundo elemento de cada par)
-      this.userBookCounts.sort((a, b) => b[1] - a[1]);
-    });
-  } catch (error) {
-    console.error("Erro ao buscar dados:", error);
-  }
-},
+        response.data.data.forEach((rental) => {
+          const userName = rental.user.name;
+          if (userBookCountMap[userName]) {
+            userBookCountMap[userName]++;
+          } else {
+            userBookCountMap[userName] = 1;
+          }
+        });
 
+        // Transforma o objeto em um array de pares [usuário, total]
+        this.userBookCounts = Object.entries(userBookCountMap);
+
+        // Ordena o array pelo total de livros alugados (segundo elemento de cada par)
+        this.userBookCounts.sort((a, b) => b[1] - a[1]);
+      } else {
+        console.error("Os dados da resposta não são um array:", response.data.data);
+      }
+    } catch (error) {
+      console.error("Erro ao buscar dados:", error);
+    }
   },
+},
 };
 </script>
 

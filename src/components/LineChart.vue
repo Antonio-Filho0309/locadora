@@ -11,54 +11,46 @@
 
 <script>
 import Chart from "chart.js";
-import Aluguel from "../services/rental";
+import Book from "../services/book";
 
 export default {
   data: () => ({
-    alugueis: [],
-    maisalugados: [],
+   books: [],
   }),
   mounted() {
     this.list();
   },
   methods: {
-    list() {
-      Aluguel.list()
-        .then((response) => {
-          this.alugueis = response.data;
-          this.CalcMaisAlug();
-        })
-        .catch((error) => {
-          console.error("Erro na busca de aluguéis", error);
-        });
-    },
-    CalcMaisAlug() {
-      const AlugsCount = {};
-      this.alugueis.forEach((alug) => {
-        const livronome = alug.livro_id.nome;
-        if (AlugsCount[livronome]) {
-          AlugsCount[livronome]++;
-        } else {
-          AlugsCount[livronome] = 1;
-        }
-      });
-      this.maisalugados = Object.keys(AlugsCount)
-        .sort((a, b) => AlugsCount[b] - AlugsCount[a])
-        .map((livronome) => ({ livronome, quantidade: AlugsCount[livronome] }));
-    },
+   async list() {
+    try {
+      const mostBooks = await Book.listDash();
+
+      this.books = mostBooks.data.data.slice(0,4).map((item) => ({
+        label:item.name,
+        data: item.rented,
+      }));
+       this.books.sort((a, b) => b.data - a.data);
+       console.log(this.books)
+      this.upCharts();
+    }catch (error) {
+      console.error("Erro ao buscar os livros  mais alugados:" , error);
+    }
+   },
+
     upCharts() {
-      
+      if(!this.books) return;
+      const labels = this.books.map((item)=> item.label);
+      const data = this.books.map((item)=> item.data);
       const ctx = this.$refs.myChart.getContext("2d");
       new Chart(ctx, {
         type: "bar",
         data: {
-          labels: this.maisalugados.slice(0, 4).map((livro) => livro.livronome),
+          labels: labels,
           datasets: [
             {
               label: "Quantidade Alugada",
-              data: this.maisalugados
-                .slice(0, 4)
-                .map((livro) => livro.quantidade),
+              data: data,
+              fill: false ,
               backgroundColor: [
                 "rgb(255, 99, 132)",
                 "rgb(54, 162, 235)",
@@ -87,7 +79,6 @@ export default {
             x: {
               ticks: {
                 callback: function (value) {
-                  // Dividir o rótulo em várias linhas usando "\n"
                   return value.split("\n");
                 },
                 autoSkip: false,
