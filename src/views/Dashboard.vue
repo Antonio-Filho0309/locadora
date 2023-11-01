@@ -20,7 +20,6 @@
                 color="#f9faf"
                 class="rounded-circle border circulo"
                 flat
-                
               >
                 <v-icon size="50" color="blue">{{ list.icon }}</v-icon>
                 <v-card-text class="grey--text text-lg-h6">{{ list.title }}</v-card-text>
@@ -52,14 +51,14 @@
                 <div class="centro mb-3">
                   <v-icon class="mr-2">mdi-book-open-variant</v-icon>
                   <span class="align-middle">
-                    Livro: {{ ultimoLivroAlugado.livro_id.nome }}
+                    Livro: {{ ultimoLivroAlugado ? ultimoLivroAlugado.bookId.nome : 'Nenhum livro disponível' }}
                   </span>
                 </div>
 
                 <div class="centro">
                   <v-icon class="mr-2">mdi-account</v-icon>
                   <span class="align-middle">
-                    Usuario: {{ ultimoLivroAlugado.usuario_id.nome }}
+                    Usuario: {{ ultimoLivroAlugado ? ultimoLivroAlugado.userId.nome : 'Nenhum usuário disponível' }}
                   </span>
                 </div>
               </v-card-content>
@@ -80,10 +79,10 @@
 <script>
 import Table from "../components/Table";
 import LineChart from "../components/LineChart";
-import Aluguel from "../services/rental";
-import Livro from "../services/book";
-import Usuario from "../services/user";
-import Editora from "../services/publisher";
+import Rental from "../services/rental";
+import Book from "../services/book";
+import User from "../services/user";
+import Publisher from "../services/publisher";
 
 export default {
   name: "DashBoard",
@@ -135,8 +134,8 @@ export default {
       this.Publist();
     },
     list() {
-      Aluguel.list().then((response) => {
-        const alugueisOrdenados = response.data.sort((a, b) => a.id - b.id);
+      Rental.list().then((response) => {
+        const alugueisOrdenados = response.data.data.sort((a, b) => a.id - b.id);
         this.alugueis = alugueisOrdenados;
         this.ultimoLivroAlugado =
           alugueisOrdenados[alugueisOrdenados.length - 1];
@@ -145,22 +144,22 @@ export default {
       });
     },
     Booklist() {
-      Livro.list().then((response) => {
-        this.livros = response.data;
+      Book.list().then((response) => {
+        this.livros = response.data.data;
         this.lists.find((item) => item.title === "Livros").count =
           this.livros.length;
       });
     },
     Userlist() {
-      Usuario.list().then((response) => {
-        this.usuarios = response.data;
+      User.list().then((response) => {
+        this.usuarios = response.data.data;
         this.lists.find((item) => item.title === "Usuários").count =
           this.usuarios.length;
       });
     },
     Publist() {
-      Editora.list().then((response) => {
-        this.editoras = response.data;
+      Publisher.list().then((response) => {
+        this.editoras = response.data.data;
         this.lists.find((item) => item.title === "Editoras").count =
           this.editoras.length;
       });
@@ -273,3 +272,4 @@ export default {
   }
 }
 </style>
+
