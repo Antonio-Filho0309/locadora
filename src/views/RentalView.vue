@@ -2,7 +2,8 @@
   <v-card>
     <v-card-title>
       <v-text-field
-        v-model="search"
+        v-model="searchBar"
+        @input="updateSearch"
         append-icon="mdi-magnify"
         label="Pesquisar"
         single-line
@@ -13,7 +14,7 @@
     <v-data-table
       :headers="headers"
       :items="rentals"
-      :search="search"
+      :search="searchBar"
       :loading="loadingTable"
       loading-text="Carregando..."
       :server-items-length="total"
@@ -33,8 +34,14 @@
         <td>{{ item.previewDate | formatDate }}</td>
       </template>
       <template v-slot:[`item.returnDate`]="{ item }">
-        <td v-if="item.returnDate != null">
+        <td>
           {{ item.returnDate | formatDate }}
+        </td>
+        <td
+          v-if="item.returnDate == null"
+          style="font-style: italic; color: #a2a2a2"
+        >
+          Aguardando...
         </td>
       </template>
       <template v-slot:top>
@@ -50,7 +57,7 @@
               </v-btn>
             </template>
 
-            <v-form ref="RentalForm" @submit.prevent="save">
+            <v-form ref="rentalForm" @submit.prevent="save">
               <v-card>
                 <v-card-title>
                   <span class="text-h5">{{ formTitle }}</span>
@@ -128,7 +135,7 @@
           v-if="item.status == 'Pendente'"
           text
           small
-          @click="devolItem(item)"
+          @click="BookDevol(item)"
         >
           <v-icon class="green--text">mdi-book</v-icon>
         </v-btn>
@@ -157,6 +164,7 @@ export default {
       usersList: [],
       booksList: [],
       search: "",
+      searchBar: "",
       total: 0,
       page: 1,
       pageSize: 5,
@@ -167,6 +175,7 @@ export default {
       returnDate: null,
       loadingTable: true,
       formIsValid: false,
+      formattedSearch: "",
       rulesNumber: [(value) => !!value || "Campo Obrigatório"],
       dialog: false,
       headers: [
@@ -219,9 +228,34 @@ export default {
 
   methods: {
     resetValidation() {
-      this.$refs.RentalForm.resetValidation();
+      this.$refs.rentalForm.resetValidation();
     },
+    updateSearch(newSearchValue) {
+      const dateRegex = /^(\d{1,2})\/?(\d{1,2})?\/?(\d{0,4})?$/;
+      this.search = this.searchBar;
+      if (dateRegex.test(newSearchValue)) {
+        this.search = this.parseDate(newSearchValue);
+        console.log(this.search);
+        this.list();
+      } else {
+        this.search = newSearchValue;
+        this.list();
+      }
+    },
+    parseDate(date) {
+      const [day, month, year] = date.split("/");
+      let formattedDate = `${day}`;
 
+      if (month) {
+        formattedDate = `-${month}-${day}`;
+      }
+
+      if (year && month) {
+        formattedDate = `${year}-${month}-${day}`;
+      }
+
+      return formattedDate;
+    },
     /*para dizer a cor do status*/
     statusClass(item) {
       if (item.status == "Atrasado") {
@@ -298,110 +332,91 @@ export default {
     },
 
     checkFormValidity() {
-      this.formIsValid = this.$refs.RentalForm.validate();
+      return this.$refs.rentalForm.validate();
     },
 
     // Listar
 
-    devolItem(item) {
+    BookDevol(item) {
       Swal.fire({
-        title: "Devolver livro?!",
-        text: "Tem certeza que deseja fazer isso ?",
         icon: "warning",
+        title: "Deseja Devolver o livro?",
+        text: "Essa ação não pode ser desfeita!",
         showCancelButton: true,
-        confirmButtonText: "Confirmar",
-        confirmButtonColor: "#1976d2",
-        cancelButtonText: "Cancelar",
-        cancelButtonColor: "#ff5252",
+        confirmButtonText: "Sim",
+        cancelButtonText: "Não",
+        confirmButtonColor: "#3085d6",
+        cancelButtonColor: "#d33",
       }).then((result) => {
         if (result.isConfirmed) {
-          this.devolver(item);
+          const RentalDevo = {
+            id: item.id,
+            returnDate: new Date().toISOString().substr(0, 10),
+          };
+          console.log(RentalDevo);
+          Rental.update(RentalDevo).then((response) => {
+            Swal.fire({
+              icon: "success",
+              title: response.data.message,
+              showConfirmButton: false,
+              timer: 2000,
+            });
+
+            this.list();
+            this.zerar();
+            this.resetValidation();
+          });
         }
-      });
-    },
-
-    devolver(rental) {
-      if (rental.previewDate == "Não devolvido") {
-        this.id = rental.id;
-        this.userId = rental.userId;
-        this.bookId = rental.usuario_id;
-        this.rentalDate = rental.rentalDate;
-        this.previewDate = rental.previewDate;
-        this.confirmDevol();
-      } else {
-        Swal.fire("O livro já foi devolvido!", "", "error");
-      }
-    },
-
-    confirmDevol() {
-      const RentalDevo = {
-       id: this.rental.id,
-       returnDate: this.rental.returnDate,
-      };
-      
-
-      Rental.update(RentalDevo).then((response) => {
-        Swal.fire({
-          icon: "success",
-          title: response.data.message,
-          showConfirmButton: false,
-          timer: 2000,
-        });
-        console.log(RentalDevo);
-        this.list();
-        this.zerar();
-        this.resetValidation();
       });
     },
 
     close() {
       this.dialog = false;
       this.zerar();
+      this.resetValidation();
     },
 
     save() {
-      const newRental = {
-        bookId: this.rental.book,
-        userId: this.rental.user,
-        rentalDate: this.rental.rentalDate,
-        previewDate: this.rental.previewDate,
-      };
+      if (this.checkFormValidity()) {
+        const newRental = {
+          bookId: this.rental.book,
+          userId: this.rental.user,
+          rentalDate: this.rental.rentalDate,
+          previewDate: this.rental.previewDate,
+        };
 
-      Rental.save(newRental)
-        .then((response) => {
-          Swal.fire({
-            icon: "success",
-            title: response.data.message,
-            showConfirmButton: false,
-            timer: 2000,
-          });
-          this.list();
-          this.close();
-          this.zerar();
-          this.resetValidation();
-        }).catch ((error) => {
-           console.log(error.response.data.message);
+        Rental.save(newRental)
+          .then((response) => {
+            Swal.fire({
+              icon: "success",
+              title: response.data.message,
+              showConfirmButton: false,
+              timer: 2000,
+            });
+            this.list();
+            this.close();
+            this.zerar();
+            this.resetValidation();
+          })
+          .catch((error) => {
+            console.log(error.response.data.message);
             Swal.fire({
               icon: "error",
               title: "Erro ao cadastrar livro",
               text: error.response.data.message,
               showConfirmButton: false,
               timer: 3000,
-        });
-        });
-    },
-
-    addAluguel() {
-      this.checkFormValidity();
-      if (this.formIsValid) {
-        this.save();
+            });
+          });
       }
     },
+
     zerar() {
-      this.bookId = "";
-      this.userId = "";
+      this.rental.book = "";
+      this.rental.user = "";
       this.rental.previewDate = "";
       this.rental.rentalDate = new Date().toISOString().substr(0, 10);
+      this.resetValidation();
     },
   },
 };
