@@ -11,6 +11,13 @@
             </tr>
           </thead>
           <tbody>
+
+            <template v-if="limitedUserBookCounts.length === 0">
+              <tr>
+                <td colspan="2" class="text-center">Nenhum usuário com pelo menos 2 livros alugados </td>
+              </tr>
+            </template>
+    
             <tr v-for="(userCount, index) in limitedUserBookCounts" :key="index">
               <td>{{ userCount[0] }}</td>
               <td class="text-center">{{ userCount[1] }}</td>
@@ -30,7 +37,7 @@ export default {
   data() {
     return {
       userBookCounts: [],
-      minBooksAlugados: 10, 
+      minBooksAlugados: 2, 
       maxDisplayedUsers: 7,
     };
   },
@@ -48,34 +55,37 @@ export default {
   },
  methods: {
   async fetchUserBookCounts() {
-    try {
-      const response = await Rental.listDash();
+  try {
+    const response = await Rental.listDash();
 
+    if (Array.isArray(response.data.data)) {
+      const userBookCountMap = {};
 
-      if (Array.isArray(response.data.data)) {
-        const userBookCountMap = {};
+      response.data.data.forEach((rental) => {
+        const userName = rental.user.name;
 
-        response.data.data.forEach((rental) => {
-          const userName = rental.user.name;
-          if (userBookCountMap[userName]) {
-            userBookCountMap[userName]++;
-          } else {
-            userBookCountMap[userName] = 1;
-          }
-        });
+        if (userBookCountMap[userName]) {
+          userBookCountMap[userName]++;
+        } else {
+          userBookCountMap[userName] = 1;
+        }
+      });
 
-        // Transforma o objeto em um array de pares [usuário, total]
-        this.userBookCounts = Object.entries(userBookCountMap);
+      
+      this.userBookCounts = Object.entries(userBookCountMap);
 
-        // Ordena o array pelo total de livros alugados (segundo elemento de cada par)
-        this.userBookCounts.sort((a, b) => b[1] - a[1]);
-      } else {
-        console.error("Os dados da resposta não são um array:", response.data.data);
-      }
-    } catch (error) {
-      console.error("Erro ao buscar dados:", error);
+      
+      this.userBookCounts.sort((a, b) => b[1] - a[1]);
+
+      
+    } else {
+      console.error("Os dados da resposta não são um array:", response.data.data);
     }
-  },
+  } catch (error) {
+    console.error("Erro ao buscar dados:", error);
+  }
+},
+
 },
 };
 </script>

@@ -98,17 +98,19 @@ export default {
     search: "",
     formIsValid: false,
     loadingTable: true,
+    dialog: false,
+
     rules: [
       (value) => !!value || "Campo Obrigatório",
       (value) => (value && value.length >= 3) || "Minimo 3 caracteres",
     ],
-    dialog: false,
     headers: [
       { text: "ID", value: "id" },
       { text: "Nome", value: "name" },
       { text: "Cidade", value: "city" },
       { text: "Ações", value: "actions", sortable: false },
     ],
+
     publisher: {
       id: 0,
       name: "",
@@ -122,14 +124,6 @@ export default {
     desc: false,
     errors: [],
     editedIndex: -1,
-    editedItem: {
-      name: "",
-      city: "",
-    },
-    defaultItem: {
-      name: "",
-      city: "",
-    },
   }),
 
   mounted() {

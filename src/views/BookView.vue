@@ -73,7 +73,7 @@
                       :min="1000"
                       class="mt-4"
                     ></v-text-field>
-                    <v-select
+                    <v-autocomplete
                       v-model="book.publisher"
                       :items="publishersList"
                       item-text="name"
@@ -82,7 +82,7 @@
                       prepend-icon="mdi-domain"
                       :rules="rulesNumber"
                       required
-                    ></v-select>
+                    ></v-autocomplete>
                     <v-text-field
                       v-model="book.quantity"
                       label="Quantidade de livros"
@@ -127,12 +127,14 @@ export default {
       search: "",
       loadingTable: true,
       formIsValid: false,
+      dialog: false,
+
       rules: [
         (value) => !!value || "Campo Obrigatório",
         (value) => (value && value.length >= 3) || "Mínimo 3 caracteres",
       ],
       rulesNumber: [(value) => !!value || "Campo Obrigatório"],
-      dialog: false,
+
       headers: [
         { text: "ID", value: "id" },
         { text: "Nome", value: "name" },
@@ -143,6 +145,7 @@ export default {
         { text: "Total Alugado", value: "rented" },
         { text: "Ações", value: "actions", sortable: false },
       ],
+
       book: {
         id: 0,
         name: "",
@@ -155,29 +158,12 @@ export default {
       books: [],
       errors: [],
       editedIndex: -1,
-      editedItem: {
-        id: "",
-        name: "",
-        author: "",
-        publisher: {},
-        release: 0,
-        quantity: 0,
-        rented: 0,
-      },
+
       total: 0,
       page: 1,
       pageSize: 5,
       orderByProperty: "id",
       desc: false,
-      defaultItem: {
-        id: "",
-        name: "",
-        author: "",
-        publisher: {},
-        release: 0,
-        quantity: 0,
-        rented: 0,
-      },
     };
   },
 

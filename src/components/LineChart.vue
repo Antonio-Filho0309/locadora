@@ -3,7 +3,7 @@
     <div class="flexbox">
       <div class="chart_container">
         <div class="title text-center">Livros mais alugados</div>
-        <canvas ref="myChart" id="myChart"></canvas>
+        <canvas ref="myChart" id="myChart" height="250"></canvas>
       </div>
     </div>
   </v-flex>
@@ -70,27 +70,30 @@ export default {
             },
           ],
         },
-        options: {
+       options: {
+          scales: {
+            yAxes: [
+              {
+                ticks: {
+                  display: false,
+                },
+                gridLines: {
+                  display: false,
+                },
+              },
+            ],
+            xAxes: [
+              {
+                gridLines: {
+                  display: false,
+                },
+              },
+            ],
+          },
           legend: {
             display: false,
           },
-
-          scales: {
-            x: {
-              ticks: {
-                callback: function (value) {
-                  return value.split("\n");
-                },
-                autoSkip: false,
-              },
-            },
-            y: {
-              beginAtZero: true,
-            },
           },
-          maintainAspectRatio: false,
-          aspectRatio: 1,
-        },
       });
     },
   },

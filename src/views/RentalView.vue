@@ -64,7 +64,7 @@
                 </v-card-title>
                 <v-card-text>
                   <v-container>
-                    <v-select
+                    <v-autocomplete
                       label="Nome do Livro"
                       :rules="rulesNumber"
                       hide-details="auto"
@@ -74,8 +74,8 @@
                       item-text="name"
                       item-value="id"
                       prepend-icon="mdi-book"
-                    ></v-select>
-                    <v-select
+                    ></v-autocomplete>
+                    <v-autocomplete
                       label="Usuário"
                       :rules="rulesNumber"
                       hide-details="auto"
@@ -85,7 +85,7 @@
                       item-value="id"
                       item-text="name"
                       prepend-icon="mdi-account-circle"
-                    ></v-select>
+                    ></v-autocomplete>
                     <v-row class="my-3">
                       <v-col cols="6">
                         <v-text-field
@@ -212,7 +212,7 @@ export default {
 
   computed: {
     formTitle() {
-      return this.editedIndex === -1 ? "Adicionar Aluguel" : "Editar Aluguel";
+      return  "Adicionar Aluguel";
     },
   },
 
@@ -364,7 +364,7 @@ export default {
 
             this.list();
             this.zerar();
-            this.resetValidation();
+            // this.resetValidation();
           });
         }
       });
@@ -373,7 +373,7 @@ export default {
     close() {
       this.dialog = false;
       this.zerar();
-      this.resetValidation();
+      // this.resetValidation();
     },
 
     save() {
@@ -394,6 +394,7 @@ export default {
               timer: 2000,
             });
             this.list();
+            this.listBooks();
             this.close();
             this.zerar();
             this.resetValidation();

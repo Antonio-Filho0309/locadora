@@ -90,6 +90,7 @@ export default {
     return {
       usuarioComMaisAlugueis: null,
       ultimoUsuarioAlugou: null,
+      ultimoLivroAlugado: null, 
       users: [],
       books: [],
       rentals: [],

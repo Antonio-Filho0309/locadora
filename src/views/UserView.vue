@@ -148,18 +148,6 @@ export default {
       desc: false,
       errors: [],
       editedIndex: -1,
-      editedItem: {
-        name: "",
-        city: "",
-        email: "",
-        address: "",
-      },
-      defaultItem: {
-        name: "",
-        city: "",
-        email: "",
-        address: "",
-      },
     };
   },
 
