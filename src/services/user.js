@@ -18,6 +18,9 @@ export default{
         return http.get("user/getSelect");
       },
 
+      listDash:()=> {
+        return http.get("user/dash");
+      },
 
     save:(user)=>{
       return http.post("user", user)

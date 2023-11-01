@@ -14,6 +14,10 @@ export default{
         })
       },
 
+      listDash:()=> {
+        return http.get("book/dash");
+      },
+
       select: () => {
         return http.get("book/getSelect");
       },

@@ -14,6 +14,10 @@ export default{
         })
       },
 
+      listDash:()=> {
+        return http.get("rental/dash");
+      },
+
     save:(rental)=>{
       return http.post("rental", rental)
     },

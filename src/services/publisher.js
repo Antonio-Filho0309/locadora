@@ -13,6 +13,10 @@ export default {
     });
   },
 
+  listDash:()=> {
+    return http.get("publisher/dash");
+  },
+
   select: () => {
     return http.get("publisher/getSelect");
   },

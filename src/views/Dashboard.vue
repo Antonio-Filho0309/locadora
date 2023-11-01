@@ -51,14 +51,14 @@
                 <div class="centro mb-3">
                   <v-icon class="mr-2">mdi-book-open-variant</v-icon>
                   <span class="align-middle">
-                    Livro: {{ ultimoLivroAlugado ? ultimoLivroAlugado.bookId.nome : 'Nenhum livro disponível' }}
+                    Livro: {{ ultimoLivroAlugado ? ultimoLivroAlugado.book.name : 'Nenhum livro disponível' }}
                   </span>
                 </div>
 
                 <div class="centro">
                   <v-icon class="mr-2">mdi-account</v-icon>
                   <span class="align-middle">
-                    Usuario: {{ ultimoLivroAlugado ? ultimoLivroAlugado.userId.nome : 'Nenhum usuário disponível' }}
+                    Usuário: {{ ultimoUsuarioAlugou ? ultimoUsuarioAlugou : 'Nenhum usuário disponível' }}
                   </span>
                 </div>
               </v-card-content>
@@ -89,11 +89,11 @@ export default {
   data() {
     return {
       usuarioComMaisAlugueis: null,
-      usuarios: [],
-      livros: [],
-      alugueis: [],
-      editoras: [],
-      ultimoLivroAlugado: null,
+      ultimoUsuarioAlugou: null,
+      users: [],
+      books: [],
+      rentals: [],
+      publishers: [],
       lists: [
         {
           icon: "mdi-account",
@@ -128,40 +128,47 @@ export default {
   },
   methods: {
     updateCounts() {
-      this.list();
-      this.Booklist();
-      this.Userlist();
-      this.Publist();
+      this.RentalList();
+      this.BookList();
+      this.UserList();
+      this.PubList();
     },
-    list() {
-      Rental.list().then((response) => {
-        const alugueisOrdenados = response.data.data.sort((a, b) => a.id - b.id);
-        this.alugueis = alugueisOrdenados;
-        this.ultimoLivroAlugado =
-          alugueisOrdenados[alugueisOrdenados.length - 1];
+
+     async RentalList() {
+     await Rental.listDash().then((response) => {
+        this.rentals = response.data.data;
+         this.rentals.sort((a, b) => b.id - a.id);
+          if (this.rentals.length > 0) {
+      this.ultimoLivroAlugado = this.rentals[0]; 
+      this.ultimoUsuarioAlugou = this.ultimoLivroAlugado.user.name; 
+    } else {
+      this.ultimoLivroAlugado = null; // Define como nulo se não houver aluguel
+      this.ultimoUsuarioAlugou = null; // Define como nulo se não houver aluguel
+    }
         this.lists.find((item) => item.title === "Alugueis").count =
-          this.alugueis.length;
+          this.rentals.length;
       });
     },
-    Booklist() {
-      Book.list().then((response) => {
-        this.livros = response.data.data;
+ 
+   async BookList() {
+     await Book.listDash().then((response) => {
+        this.books = response.data.data;
         this.lists.find((item) => item.title === "Livros").count =
-          this.livros.length;
+          this.books.length;
       });
     },
-    Userlist() {
-      User.list().then((response) => {
-        this.usuarios = response.data.data;
+   async UserList() {
+     await User.listDash().then((response) => {
+        this.users = response.data.data;
         this.lists.find((item) => item.title === "Usuários").count =
-          this.usuarios.length;
+          this.users.length;
       });
     },
-    Publist() {
-      Publisher.list().then((response) => {
-        this.editoras = response.data.data;
+    async PubList() {
+      await Publisher.listDash().then((response) => {
+        this.publishers = response.data.data;
         this.lists.find((item) => item.title === "Editoras").count =
-          this.editoras.length;
+          this.publishers.length;
       });
     },
     navigateToRoute(routeName) {
