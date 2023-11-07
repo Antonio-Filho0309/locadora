@@ -232,30 +232,42 @@ export default {
       this.formIsValid = this.$refs.rentalForm.validate();
     },
 
-    updateSearch(newSearchValue) {
+     updateSearch(newSearchValue) {
       const dateRegex = /^(\d{1,2})\/?(\d{1,2})?\/?(\d{0,4})?$/;
-      this.search = this.searchBar;
+      this.page = 1;
+
       if (dateRegex.test(newSearchValue)) {
         this.search = this.parseDate(newSearchValue);
-        console.log(this.search);
-        this.list();
+      } else if (newSearchValue.match(/^\d{1,2}\/$/)) {
+        this.search = this.parseDate(newSearchValue);
       } else {
         this.search = newSearchValue;
-        this.list();
       }
+      this.list();
     },
+
     parseDate(date) {
-      const [day, month, year] = date.split("/");
-      let formattedDate = `${day}`;
+      const dateParts = date.split("/");
+      let formattedDate = "";
 
-      if (month) {
-        formattedDate = `-${month}-${day}`;
+      if (dateParts.length >= 1) {
+        const day = dateParts[0];
+        formattedDate = `${day}`;
       }
 
-      if (year && month) {
-        formattedDate = `${year}-${month}-${day}`;
+      if (dateParts.length >= 2) {
+        const month = dateParts[1];
+        if (month.length === 2) {
+          formattedDate = `${month}-${formattedDate}`;
+        }
       }
 
+      if (dateParts.length >= 3) {
+        const year = dateParts[2];
+        if (year.length === 4) {
+          formattedDate = `${year}-${formattedDate}`;
+        }
+      }
       return formattedDate;
     },
     /*para dizer a cor do status*/
@@ -383,6 +395,7 @@ export default {
     },
 
     save() {
+
       const newRental = {
         bookId: this.rental.book,
         userId: this.rental.user,
@@ -424,4 +437,12 @@ export default {
 };
 </script>
 
-<style scoped></style>
+<style>
+.swal2-popup {
+  font-family: 'Arial', sans-serif;
+}
+
+.swal2-title {
+  font-size: 31px;
+}
+</style>

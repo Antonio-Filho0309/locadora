@@ -306,4 +306,12 @@ export default {
 };
 </script>
 
-<style scoped></style>
+<style>
+.swal2-popup {
+  font-family: 'Arial', sans-serif;
+}
+
+.swal2-title {
+  font-size: 31px;
+}
+</style>
