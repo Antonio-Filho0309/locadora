@@ -4,7 +4,7 @@ import Dashboard from '../views/Dashboard.vue'
 import BookView from '../views/BookView.vue'
 import RentalView from '../views/RentalView.vue'
 import UserView from '../views/UserView.vue'
-import PubView from '../views/PubView.vue'
+import PubView from '../views/PublisherView.vue'
 
 
 Vue.use(VueRouter)

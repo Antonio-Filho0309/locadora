@@ -65,6 +65,7 @@
                 <v-card-text>
                   <v-container>
                     <v-autocomplete
+                      :key="resetAutocompleteKey"
                       label="Nome do Livro"
                       :rules="rulesNumber"
                       hide-details="auto"
@@ -114,7 +115,7 @@
                 <v-card-actions>
                   <v-spacer></v-spacer>
                   <v-btn text color="error" @click="close"> Fechar </v-btn>
-                  <v-btn text color="primary" @click="save"> Feito </v-btn>
+                  <v-btn text color="primary" @click="addRental"> Feito </v-btn>
                 </v-card-actions>
               </v-card>
             </v-form>
@@ -135,7 +136,7 @@
           v-if="item.status == 'Pendente'"
           text
           small
-          @click="BookDevol(item)"
+          @click="BookReturn(item)"
         >
           <v-icon class="green--text">mdi-book</v-icon>
         </v-btn>
@@ -170,9 +171,8 @@ export default {
       pageSize: 5,
       orderByProperty: "id",
       desc: false,
-      rentalDate: new Date().toISOString().substr(0, 10),
-      previewDate: "",
       returnDate: null,
+      resetAutocompleteKey: 0,
       loadingTable: true,
       formIsValid: false,
       formattedSearch: "",
@@ -199,6 +199,7 @@ export default {
         returnDate: "",
         status: "",
       },
+      
       errors: [],
       editedIndex: -1,
     };
@@ -212,7 +213,7 @@ export default {
 
   computed: {
     formTitle() {
-      return  "Adicionar Aluguel";
+      return "Adicionar Aluguel";
     },
   },
 
@@ -227,9 +228,10 @@ export default {
   },
 
   methods: {
-    resetValidation() {
-      this.$refs.rentalForm.resetValidation();
+    checkFormValidity() {
+      this.formIsValid = this.$refs.rentalForm.validate();
     },
+
     updateSearch(newSearchValue) {
       const dateRegex = /^(\d{1,2})\/?(\d{1,2})?\/?(\d{0,4})?$/;
       this.search = this.searchBar;
@@ -331,13 +333,9 @@ export default {
       }
     },
 
-    checkFormValidity() {
-      return this.$refs.rentalForm.validate();
-    },
-
     // Listar
 
-    BookDevol(item) {
+    BookReturn(item) {
       Swal.fire({
         icon: "warning",
         title: "Deseja Devolver o livro?",
@@ -363,8 +361,7 @@ export default {
             });
 
             this.list();
-            this.zerar();
-            // this.resetValidation();
+            this.$refs.rentalForm.resetValidation();
           });
         }
       });
@@ -372,52 +369,56 @@ export default {
 
     close() {
       this.dialog = false;
-      this.zerar();
-      // this.resetValidation();
+      this.rental = {
+        id: 0,
+        book: 0,
+        user: 0,
+        rentalDate: new Date().toISOString().substr(0, 10),
+        previewDate: "",
+        returnDate: "",
+        status: "",
+      };
+      this.resetAutocompleteKey++;
+       this.$refs.rentalForm.resetValidation();
     },
 
     save() {
-      if (this.checkFormValidity()) {
-        const newRental = {
-          bookId: this.rental.book,
-          userId: this.rental.user,
-          rentalDate: this.rental.rentalDate,
-          previewDate: this.rental.previewDate,
-        };
+      const newRental = {
+        bookId: this.rental.book,
+        userId: this.rental.user,
+        rentalDate: this.rental.rentalDate,
+        previewDate: this.rental.previewDate,
+      };
 
-        Rental.save(newRental)
-          .then((response) => {
-            Swal.fire({
-              icon: "success",
-              title: response.data.message,
-              showConfirmButton: false,
-              timer: 2000,
-            });
-            this.list();
-            this.listBooks();
-            this.close();
-            this.zerar();
-            this.resetValidation();
-          })
-          .catch((error) => {
-            console.log(error.response.data.message);
-            Swal.fire({
-              icon: "error",
-              title: "Erro ao cadastrar livro",
-              text: error.response.data.message,
-              showConfirmButton: false,
-              timer: 3000,
-            });
+      Rental.save(newRental)
+        .then((response) => {
+          Swal.fire({
+            icon: "success",
+            title: response.data.message,
+            showConfirmButton: false,
+            timer: 2000,
           });
-      }
+          this.list();
+          this.listBooks();
+          this.close();
+        })
+        .catch((error) => {
+          console.log(error.response.data.message);
+          Swal.fire({
+            icon: "error",
+            title: "Erro ao cadastrar livro",
+            text: error.response.data.message,
+            showConfirmButton: false,
+            timer: 3000,
+          });
+        });
     },
 
-    zerar() {
-      this.rental.book = "";
-      this.rental.user = "";
-      this.rental.previewDate = "";
-      this.rental.rentalDate = new Date().toISOString().substr(0, 10);
-      this.resetValidation();
+    addRental() {
+      this.checkFormValidity();
+      if (this.formIsValid) {
+        this.save();
+      }
     },
   },
 };

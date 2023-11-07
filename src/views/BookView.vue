@@ -69,7 +69,7 @@
                       :counter="50"
                       type="number"
                       required
-                      :max="9999"
+                      :max="2500"
                       :min="1000"
                       class="mt-4"
                     ></v-text-field>
