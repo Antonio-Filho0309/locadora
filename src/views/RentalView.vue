@@ -60,7 +60,7 @@
             <v-form ref="rentalForm" @submit.prevent="save">
               <v-card>
                 <v-card-title>
-                  <span class="text-h5">{{ formTitle }}</span>
+                  <span class="text-h5">Adicionar Aluguel</span>
                 </v-card-title>
                 <v-card-text>
                   <v-container>
@@ -126,6 +126,7 @@
           </v-dialog>
         </v-toolbar>
       </template>
+
       <template v-slot:no-data>
         <span>Sem dados</span>
       </template>
@@ -216,12 +217,6 @@ export default {
     this.list();
     this.listUsers();
     this.listBooks();
-  },
-
-  computed: {
-    formTitle() {
-      return "Adicionar Aluguel";
-    },
   },
 
   watch: {
@@ -366,12 +361,11 @@ export default {
         cancelButtonColor: "#d33",
       }).then((result) => {
         if (result.isConfirmed) {
-          const RentalDevo = {
+          const RentalReturn = {
             id: item.id,
             returnDate: new Date().toISOString().substr(0, 10),
           };
-          console.log(RentalDevo);
-          Rental.update(RentalDevo).then((response) => {
+          Rental.update(RentalReturn).then((response) => {
             Swal.fire({
               icon: "success",
               title: response.data.message,

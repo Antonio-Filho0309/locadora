@@ -281,10 +281,10 @@ export default {
           Book.delete(book)
             .then((response) => {
               Swal.fire({
-                icon: "success",
+                icon: "sucess",
                 title: response.data.message,
                 showConfirmButton: false,
-                timer: 2000,
+                timer: 3000,
               });
               this.list();
             })
