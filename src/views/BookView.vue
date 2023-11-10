@@ -64,10 +64,9 @@
                     ></v-text-field>
                     <v-text-field
                       v-model="book.release"
-                      :rules="rulesNumber"
+                      :rules="rulesYear"
                       label="Ano de lançamento"
                       prepend-icon="mdi-calendar"
-                      :counter="50"
                       type="number"
                       required
                       :max="2500"
@@ -83,12 +82,12 @@
                       prepend-icon="mdi-domain"
                       :rules="rulesNumber"
                       required
+                      no-data-text="Não encontrado"
                     ></v-autocomplete>
                     <v-text-field
                       v-model="book.quantity"
                       label="Quantidade de livros"
                       prepend-icon="mdi mdi-book-plus-multiple-outline"
-                      :counter="50"
                       type="number"
                       :rules="rulesNumber"
                       required
@@ -135,7 +134,14 @@ export default {
         (value) => !!value || "Campo Obrigatório",
         (value) => (value && value.length >= 3) || "Mínimo 3 caracteres",
       ],
-       rulesNumber: [(value) => !!value || "Campo Obrigatório"],
+      rulesNumber: [(value) => !!value || "Campo Obrigatório"],
+      currentYear: new Date().getFullYear(),
+      rulesYear: [
+        (v) => !!v || "Campo obrigatório",
+        (v) =>
+          (v && v <= this.currentYear) ||
+          "Ano não pode ser maior que o ano atual",
+      ],
 
       headers: [
         { text: "ID", value: "id" },

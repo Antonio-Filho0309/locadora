@@ -75,8 +75,9 @@
                       item-text="name"
                       item-value="id"
                       prepend-icon="mdi-book"
+                      no-data-text="Não encontrado"
                     ></v-autocomplete>
-                  
+
                     <v-autocomplete
                       label="Usuário"
                       :rules="rulesNumber"
@@ -87,6 +88,7 @@
                       item-value="id"
                       item-text="name"
                       prepend-icon="mdi-account-circle"
+                      no-data-text="Não encontrado"
                     ></v-autocomplete>
                     <v-row class="my-3">
                       <v-col cols="6">
