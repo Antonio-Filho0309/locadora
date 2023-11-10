@@ -76,6 +76,7 @@
                       item-value="id"
                       prepend-icon="mdi-book"
                     ></v-autocomplete>
+                  
                     <v-autocomplete
                       label="Usuário"
                       :rules="rulesNumber"
@@ -105,6 +106,7 @@
                           hide-details="auto"
                           required
                           v-model="rental.previewDate"
+                          :min="rental.rentalDate"
                           type="date"
                         >
                         </v-text-field>
@@ -121,6 +123,9 @@
             </v-form>
           </v-dialog>
         </v-toolbar>
+      </template>
+      <template v-slot:no-data>
+        <span>Sem dados</span>
       </template>
 
       <template v-slot:[`item.status`]="{ item }">
@@ -199,7 +204,7 @@ export default {
         returnDate: "",
         status: "",
       },
-      
+
       errors: [],
       editedIndex: -1,
     };
@@ -232,7 +237,7 @@ export default {
       this.formIsValid = this.$refs.rentalForm.validate();
     },
 
-     updateSearch(newSearchValue) {
+    updateSearch(newSearchValue) {
       const dateRegex = /^(\d{1,2})\/?(\d{1,2})?\/?(\d{0,4})?$/;
       this.page = 1;
 
@@ -391,11 +396,10 @@ export default {
         status: "",
       };
       this.resetAutocompleteKey++;
-       this.$refs.rentalForm.resetValidation();
+      this.$refs.rentalForm.resetValidation();
     },
 
     save() {
-
       const newRental = {
         bookId: this.rental.book,
         userId: this.rental.user,
@@ -439,7 +443,7 @@ export default {
 
 <style>
 .swal2-popup {
-  font-family: 'Arial', sans-serif;
+  font-family: "Arial", sans-serif;
 }
 
 .swal2-title {

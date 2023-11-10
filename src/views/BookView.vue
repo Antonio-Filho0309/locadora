@@ -46,6 +46,7 @@
                 <v-card-text>
                   <v-container>
                     <v-text-field
+                      :key="resetAutocompleteKey"
                       label="Nome"
                       :rules="rules"
                       hide-details="auto"
@@ -124,6 +125,7 @@ export default {
   data() {
     return {
       publishersList: [],
+      resetAutocompleteKey: "",
       search: "",
       loadingTable: true,
       formIsValid: false,
@@ -133,7 +135,7 @@ export default {
         (value) => !!value || "Campo Obrigatório",
         (value) => (value && value.length >= 3) || "Mínimo 3 caracteres",
       ],
-      rulesNumber: [(value) => !!value || "Campo Obrigatório"],
+       rulesNumber: [(value) => !!value || "Campo Obrigatório"],
 
       headers: [
         { text: "ID", value: "id" },
@@ -150,10 +152,10 @@ export default {
         id: 0,
         name: "",
         author: "",
-        release: 0,
+        release: null,
         publisher: 0,
-        quantity: 0,
-        rented: 0,
+        quantity: null,
+        rented: null,
       },
       books: [],
       errors: [],
@@ -301,11 +303,12 @@ export default {
         name: "",
         author: "",
         publisher: 0,
-        release: 0,
-        quantity: 0,
-        rented: 0,
+        release: null,
+        quantity: null,
+        rented: null,
       };
       this.editedIndex = -1;
+      this.resetAutocompleteKey++;
       this.checkFormValidity();
       this.$refs.bookForm.reset();
     },
@@ -318,7 +321,7 @@ export default {
           publisherId: this.book.publisher,
           release: this.book.release,
           quantity: this.book.quantity,
-          rented: 0,
+          rented: null,
         };
         Book.save(createBook)
           .then((response) => {
@@ -348,7 +351,7 @@ export default {
           author: this.book.author,
           publisherId: this.book.publisher,
           release: this.book.release,
-          quantity: this.book.quantity,
+          quantity: this.book.quantity.toString(),
         };
         Book.update(editBook)
           .then((response) => {
@@ -387,7 +390,7 @@ export default {
 
 <style>
 .swal2-popup {
-  font-family: 'Arial', sans-serif;
+  font-family: "Arial", sans-serif;
 }
 
 .swal2-title {
