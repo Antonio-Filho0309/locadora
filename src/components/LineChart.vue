@@ -3,7 +3,7 @@
     <div class="flexbox">
       <div class="chart_container">
         <div class="title text-center">Livros mais alugados</div>
-        <canvas ref="myChart" id="myChart" height="250"></canvas>
+        <canvas ref="myChart" id="myChart" height="220"></canvas>
       </div>
     </div>
   </v-flex>
@@ -15,32 +15,32 @@ import Book from "../services/book";
 
 export default {
   data: () => ({
-   books: [],
+    books: [],
   }),
   mounted() {
     this.list();
   },
   methods: {
-   async list() {
-    try {
-      const mostBooks = await Book.listDash();
+    async list() {
+      try {
+        const mostBooks = await Book.listDash();
 
-      this.books = mostBooks.data.data.slice(0,4).map((item) => ({
-        label:item.name,
-        data: item.rented,
-      }));
-       this.books.sort((a, b) => b.data - a.data);
-       console.log(this.books)
-      this.upCharts();
-    }catch (error) {
-      console.error("Erro ao buscar os livros  mais alugados:" , error);
-    }
-   },
+        this.books = mostBooks.data.data.slice(0, 4).map((item) => ({
+          label: item.name,
+          data: item.rented,
+        }));
+        this.books.sort((a, b) => b.data - a.data);
+        console.log(this.books);
+        this.upCharts();
+      } catch (error) {
+        console.error("Erro ao buscar os livros  mais alugados:", error);
+      }
+    },
 
     upCharts() {
-      if(!this.books) return;
-      const labels = this.books.map((item)=> item.label);
-      const data = this.books.map((item)=> item.data);
+      if (!this.books) return;
+      const labels = this.books.map((item) => item.label);
+      const data = this.books.map((item) => item.data);
       const ctx = this.$refs.myChart.getContext("2d");
       new Chart(ctx, {
         type: "bar",
@@ -50,7 +50,7 @@ export default {
             {
               label: "Quantidade Alugada",
               data: data,
-              fill: false ,
+              fill: false,
               backgroundColor: [
                 "rgb(255, 99, 132)",
                 "rgb(54, 162, 235)",
@@ -70,7 +70,7 @@ export default {
             },
           ],
         },
-       options: {
+        options: {
           scales: {
             yAxes: [
               {
@@ -90,10 +90,12 @@ export default {
               },
             ],
           },
+         
           legend: {
             display: false,
           },
-          },
+          maintainAspectRatio: false,
+        },
       });
     },
   },
