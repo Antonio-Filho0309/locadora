@@ -17,6 +17,7 @@
       :loading="loadingTable"
       loading-text="Carregando..."
       :server-items-length="total"
+      no-data-text="Não encontrado"
       @update:options="handleOptionsUpdate"
       class="elevation-1"
       :items-per-page="pageSize"
@@ -96,9 +97,6 @@
         <v-btn small text @click="deleteItem(item)">
           <v-icon class="error--text">mdi-delete</v-icon>
         </v-btn>
-      </template>
-       <template v-slot:no-data>
-        <span>Sem dados</span>
       </template>
     </v-data-table>
   </v-card>
@@ -340,7 +338,7 @@ export default {
 
 <style>
 .swal2-popup {
-  font-family: 'Arial', sans-serif;
+  font-family: "Arial", sans-serif;
 }
 
 .swal2-title {

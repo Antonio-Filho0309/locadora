@@ -16,6 +16,7 @@
       :search="search"
       :loading="loadingTable"
       loading-text="Carregando..."
+      no-data-text="Não encontrado"
       :server-items-length="total"
       @update:options="handleOptionsUpdate"
       class="elevation-1"

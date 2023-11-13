@@ -15,6 +15,7 @@
       :items="publishers"
       :search="search"
       :loading="loadingTable"
+      no-data-text="Não encontrado"
       loading-text="Carregando..."
       :server-items-length="total"
       @update:options="handleOptionsUpdate"
@@ -81,9 +82,6 @@
         <v-btn text small @click="deleteItem(item)">
           <v-icon class="error--text">mdi-delete</v-icon>
         </v-btn>
-      </template>
-      <template v-slot:no-data>
-        <span>Sem dados</span>
       </template>
     </v-data-table>
   </v-card>

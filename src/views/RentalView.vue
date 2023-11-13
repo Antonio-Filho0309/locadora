@@ -16,6 +16,7 @@
       :items="rentals"
       :search="searchBar"
       :loading="loadingTable"
+      no-data-text="Não encontrado"
       loading-text="Carregando..."
       :server-items-length="total"
       @update:options="handleOptionsUpdate"
@@ -125,10 +126,6 @@
             </v-form>
           </v-dialog>
         </v-toolbar>
-      </template>
-
-      <template v-slot:no-data>
-        <span>Sem dados</span>
       </template>
 
       <template v-slot:[`item.status`]="{ item }">
