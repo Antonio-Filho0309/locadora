@@ -4,7 +4,7 @@ export default {
   list: (params) => {
     return http.get("publisher/paged", {
       params: {
-        Page: params.Page,
+        PageNumber: params.PageNumber,
         PageSize: params.PageSize,
         OrderByProperty: params.OrderByProperty,
         Desc: params.Desc,

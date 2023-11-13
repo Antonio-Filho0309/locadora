@@ -22,7 +22,7 @@
       @update:options="handleOptionsUpdate"
       class="elevation-1"
       :items-per-page="pageSize"
-      :page="page"
+      :page="pageNumber"
       :footer-props="{
         itemsPerPageOptions: [5, 10, 25, this.total],
         itemsPerPageText: 'Linhas por página',
@@ -172,7 +172,7 @@ export default {
       search: "",
       searchBar: "",
       total: 0,
-      page: 1,
+      pageNumber: 1,
       pageSize: 5,
       orderByProperty: "id",
       desc: false,
@@ -233,7 +233,7 @@ export default {
 
     updateSearch(newSearchValue) {
       const dateRegex = /^(\d{1,2})\/?(\d{1,2})?\/?(\d{0,4})?$/;
-      this.page = 1;
+      this.pageNumber = 1;
 
       if (dateRegex.test(newSearchValue)) {
         this.search = this.parseDate(newSearchValue);
@@ -298,7 +298,7 @@ export default {
         this.desc = false;
       }
       this.pageSize = options.itemsPerPage;
-      this.page = options.page;
+      this.pageNumber = options.page;
       this.total = options.itemsPerPage;
       this.itemsPerPage = options.itemsPerPage;
       this.list();
@@ -307,7 +307,7 @@ export default {
     async list() {
       try {
         const response = await Rental.list({
-          Page: this.page,
+          PageNumber: this.pageNumber,
           PageSize: this.pageSize,
           OrderByProperty: this.orderByProperty,
           Desc: this.desc,
@@ -371,7 +371,6 @@ export default {
             });
 
             this.list();
-            this.$refs.rentalForm.resetValidation();
           });
         }
       });

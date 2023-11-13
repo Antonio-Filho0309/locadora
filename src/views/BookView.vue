@@ -21,7 +21,7 @@
       @update:options="handleOptionsUpdate"
       class="elevation-1"
       :items-per-page="pageSize"
-      :page="page"
+      :pageNumber="pageNumber"
       :footer-props="{
         itemsPerPageOptions: [5, 10, 25, this.total],
         itemsPerPageText: 'Linhas por página',
@@ -169,7 +169,7 @@ export default {
       editedIndex: -1,
 
       total: 0,
-      page: 1,
+      pageNumber: 1,
       pageSize: 5,
       orderByProperty: "id",
       desc: false,
@@ -227,7 +227,7 @@ export default {
         this.desc = false;
       }
       this.pageSize = options.itemsPerPage;
-      this.page = options.page;
+      this.pageNumber = options.page;
       this.total = options.itemsPerPage;
       this.itemsPerPage = options.itemsPerPage;
       this.list();
@@ -236,7 +236,7 @@ export default {
     async list() {
       try {
         const response = await Book.list({
-          Page: this.page,
+          PageNumber: this.pageNumber,
           PageSize: this.pageSize,
           OrderByProperty: this.orderByProperty,
           Desc: this.desc,
