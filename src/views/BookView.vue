@@ -21,6 +21,7 @@
       @update:options="handleOptionsUpdate"
       class="elevation-1"
       :items-per-page="pageSize"
+      :header-props="headerProps"
       :pageNumber="pageNumber"
       :footer-props="{
         itemsPerPageOptions: [5, 10, 25, this.total],
@@ -124,6 +125,9 @@ import Publisher from "../services/publisher";
 export default {
   data() {
     return {
+      headerProps: {
+        sortByText: "Ordenar por",
+      },
       publishersList: [],
       resetAutocompleteKey: "",
       search: "",

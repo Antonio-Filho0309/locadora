@@ -23,6 +23,7 @@
       class="elevation-1"
       :items-per-page="pageSize"
       :page="pageNumber"
+      :header-props="headerProps"
       :footer-props="{
         itemsPerPageOptions: [5, 10, 25, this.total],
         itemsPerPageText: 'Linhas por página',
@@ -167,6 +168,9 @@ export default {
 
   data() {
     return {
+      headerProps: {
+        sortByText: "Ordenar por",
+      },
       usersList: [],
       booksList: [],
       search: "",

@@ -20,6 +20,7 @@
       :server-items-length="total"
       @update:options="handleOptionsUpdate"
       class="elevation-1"
+      :header-props="headerProps"
       :items-per-page="pageSize"
       :page="pageNumber"
       :footer-props="{
@@ -93,6 +94,9 @@ import Publisher from "../services/publisher";
 
 export default {
   data: () => ({
+    headerProps: {
+      sortByText: "Ordenar por",
+    },
     search: "",
     formIsValid: false,
     loadingTable: true,
@@ -306,7 +310,7 @@ export default {
 
 <style>
 .swal2-popup {
-  font-family: 'Arial', sans-serif;
+  font-family: "Arial", sans-serif;
 }
 
 .swal2-title {
