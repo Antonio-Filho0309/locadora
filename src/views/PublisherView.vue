@@ -184,7 +184,6 @@ export default {
         });
         this.publishers = response.data.data;
         this.total = response.data.totalRegisters;
-        console.log(response)
       } catch (error) {
         console.error("Erro ao Listar :", error);
         if (error.response.status == 404) {
