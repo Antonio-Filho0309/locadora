@@ -26,6 +26,7 @@
       :footer-props="{
         itemsPerPageOptions: [5, 10, 25, this.total],
         itemsPerPageText: 'Linhas por página',
+        pageText: '{0}-{1} de {2}',
       }"
     >
       <template v-slot:top>
@@ -183,6 +184,7 @@ export default {
         });
         this.publishers = response.data.data;
         this.total = response.data.totalRegisters;
+        console.log(response)
       } catch (error) {
         console.error("Erro ao Listar :", error);
         if (error.response.status == 404) {

@@ -27,6 +27,7 @@
       :footer-props="{
         itemsPerPageOptions: [5, 10, 25, this.total],
         itemsPerPageText: 'Linhas por página',
+        pageText: '{0}-{1} de {2}',
       }"
     >
       <template v-slot:[`item.rentalDate`]="{ item }">
