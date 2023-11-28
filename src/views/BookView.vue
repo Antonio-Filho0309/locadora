@@ -248,6 +248,7 @@ export default {
           Search: this.search,
         });
         this.books = response.data.data;
+        console.log(this.books)
         this.total = response.data.totalRegisters;
       } catch (error) {
         console.error("Erro ao Listar: ", error);

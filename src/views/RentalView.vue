@@ -70,7 +70,7 @@
                     <v-autocomplete
                       :key="resetAutocompleteKey"
                       label="Nome do Livro"
-                      :rules="rulesNumber"
+                      :rules="rules"
                       hide-details="auto"
                       required
                       v-model="rental.book"
@@ -83,7 +83,7 @@
 
                     <v-autocomplete
                       label="Usuário"
-                      :rules="rulesNumber"
+                      :rules="rules"
                       hide-details="auto"
                       required
                       v-model="rental.user"
@@ -107,7 +107,7 @@
                       <v-col cols="6">
                         <v-text-field
                           label="Previsão de Devolução"
-                          :rules="rulesNumber"
+                          :rules="rules"
                           hide-details="auto"
                           required
                           v-model="rental.previewDate"
@@ -186,7 +186,7 @@ export default {
       loadingTable: true,
       formIsValid: false,
       formattedSearch: "",
-      rulesNumber: [(value) => !!value || "Campo Obrigatório"],
+      rules: [(value) => !!value || "Campo Obrigatório"],
       dialog: false,
       headers: [
         { text: "ID", value: "id" },
