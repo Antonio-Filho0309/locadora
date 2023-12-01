@@ -83,7 +83,7 @@
                       item-value="id"
                       label="Editora do Livro"
                       prepend-icon="mdi-domain"
-                      :rules="rulesNumber"
+                      :rules="secondRule"
                       required
                       no-data-text="Não encontrado"
                     ></v-autocomplete>
@@ -92,7 +92,7 @@
                       label="Quantidade de livros"
                       prepend-icon="mdi mdi-book-plus-multiple-outline"
                       type="number"
-                      :rules="rulesNumber"
+                      :rules="secondRule"
                       required
                     ></v-text-field>
                   </v-container>
@@ -140,7 +140,7 @@ export default {
         (value) => !!value || "Campo Obrigatório",
         (value) => (value && value.length >= 3) || "Mínimo 3 caracteres",
       ],
-      rulesNumber: [(value) => !!value || "Campo Obrigatório"],
+      secondRule: [(value) => !!value || "Campo Obrigatório"],
       currentYear: new Date().getFullYear(),
       rulesYear: [
         (v) => !!v || "Campo obrigatório",
