@@ -64,7 +64,7 @@
               </v-card-content>
             </v-card>
             <v-col cols="12" sm="6">
-              <div class="pt-5"><LineChart /></div>
+              <div class="pt-5"><LineChart/></div>
             </v-col>
             <v-col cols="12" sm="6">
               <div class="mt-7"><Table /></div>
@@ -143,8 +143,8 @@ export default {
       this.ultimoLivroAlugado = this.rentals[0]; 
       this.ultimoUsuarioAlugou = this.ultimoLivroAlugado.user.name; 
     } else {
-      this.ultimoLivroAlugado = null; // Define como nulo se não houver aluguel
-      this.ultimoUsuarioAlugou = null; // Define como nulo se não houver aluguel
+      this.ultimoLivroAlugado = null; 
+      this.ultimoUsuarioAlugou = null; 
     }
         this.lists.find((item) => item.title === "Alugueis").count =
           this.rentals.length;
