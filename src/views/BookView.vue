@@ -219,10 +219,10 @@ export default {
         id: "Id",
         name: "Name",
         author: "Author",
-        release: "release",
-        publisher: "publisher",
-        quantity: "quantity",
-        rented: "rented",
+        release: "Release",
+        "publisher.name": "Publisher.Name",
+        quantity: "Quantity",
+        rented: "Rented",
       };
       if (options.sortBy[0] || options.sortDesc[0]) {
         this.orderByProperty = sortByMapping[options.sortBy[0]];

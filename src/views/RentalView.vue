@@ -31,14 +31,14 @@
       }"
     >
       <template v-slot:[`item.rentalDate`]="{ item }">
-        <td>{{ item.rentalDate | formatDate }}</td>
+        <td>{{ item.rentalDate  }}</td>
       </template>
       <template v-slot:[`item.previewDate`]="{ item }">
-        <td>{{ item.previewDate | formatDate }}</td>
+        <td>{{ item.previewDate }}</td>
       </template>
       <template v-slot:[`item.returnDate`]="{ item }">
         <td>
-          {{ item.returnDate | formatDate }}
+          {{ item.returnDate }}
         </td>
         <td
           v-if="item.returnDate == null"
@@ -157,16 +157,6 @@ import User from "../services/user";
 import Book from "../services/book";
 import Rental from "../services/rental";
 export default {
-  filters: {
-    formatDate: function (value) {
-      if (value) {
-        const date = new Date(value);
-        return date.toLocaleDateString("pt-BR");
-      }
-      return "";
-    },
-  },
-
   data() {
     return {
       headerProps: {
@@ -195,7 +185,7 @@ export default {
         { text: "Data do Aluguel", value: "rentalDate" },
         { text: "Previsão de Devolução", value: "previewDate" },
         { text: "Data de Devolução", value: "returnDate" },
-        { text: "Status", value: "status", align: "center", sortable: false },
+        { text: "Status", value: "status", align: "center" },
         { text: "Ações", value: "actions", sortable: false },
       ],
       rentals: [],
@@ -250,6 +240,20 @@ export default {
       this.list();
     },
 
+      formatDate(dateString) {
+      const utcDate = new Date(dateString);
+      const localDate = new Date(
+        utcDate.getTime() + utcDate.getTimezoneOffset() * 60000
+      );
+      const options = {
+        year: "numeric",
+        month: "2-digit",
+        day: "2-digit",
+        timeZone: "UTC",
+      };
+      return localDate.toLocaleDateString("pt-BR", options);
+    },
+
     parseDate(date) {
       const dateParts = date.split("/");
       let formattedDate = "";
@@ -288,8 +292,8 @@ export default {
     handleOptionsUpdate(options) {
       const sortByMapping = {
         id: "Id",
-        book: "Book",
-        user: "User",
+        "book.name": "Book.Name",
+        "user.name": "User.Name",
         rentalDate: "RentalDate",
         previewDate: "PreviewDate",
         returnDate: "ReturnDate",
@@ -320,6 +324,15 @@ export default {
         });
         this.rentals = response.data.data;
         this.total = response.data.totalRegisters;
+        
+        this.rentals.forEach((rental) => {
+          rental.previewDate = this.formatDate(rental.previewDate);
+          rental.rentalDate = this.formatDate(rental.rentalDate);
+          rental.returnDate = rental.returnDate = rental.returnDate
+            ? this.formatDate(rental.returnDate)
+            : null;
+        });
+
       } catch (error) {
         console.log("Erro ao Listar: ", error);
         if (error.response.status == 404) {
