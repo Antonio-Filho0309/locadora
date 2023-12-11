@@ -22,7 +22,9 @@
                 flat
               >
                 <v-icon size="50" color="blue">{{ list.icon }}</v-icon>
-                <v-card-text class="grey--text text-lg-h6">{{ list.title }}</v-card-text>
+                <v-card-text class="grey--text text-lg-h6">{{
+                  list.title
+                }}</v-card-text>
                 <v-btn
                   absolute
                   color="blue darken-3"
@@ -51,20 +53,30 @@
                 <div class="centro mb-3">
                   <v-icon class="mr-2">mdi-book-open-variant</v-icon>
                   <span class="align-middle">
-                    Livro: {{ ultimoLivroAlugado ? ultimoLivroAlugado.book.name : 'Nenhum livro disponível' }}
+                    Livro:
+                    {{
+                      lastBookRented
+                        ? lastBookRented.book.name
+                        : "Nenhum livro disponível"
+                    }}
                   </span>
                 </div>
 
                 <div class="centro">
                   <v-icon class="mr-2">mdi-account</v-icon>
                   <span class="align-middle">
-                    Usuário: {{ ultimoUsuarioAlugou ? ultimoUsuarioAlugou : 'Nenhum usuário disponível' }}
+                    Usuário:
+                    {{
+                      lastUserRented
+                        ? lastUserRented
+                        : "Nenhum usuário disponível"
+                    }}
                   </span>
                 </div>
               </v-card-content>
             </v-card>
             <v-col cols="12" sm="6">
-              <div class="pt-5"><LineChart/></div>
+              <div class="pt-5"><LineChart /></div>
             </v-col>
             <v-col cols="12" sm="6">
               <div class="mt-7"><Table /></div>
@@ -89,8 +101,8 @@ export default {
   data() {
     return {
       usuarioComMaisAlugueis: null,
-      ultimoUsuarioAlugou: null,
-      ultimoLivroAlugado: null, 
+      lastUserRented: null,
+      lastBookRented: null,
       users: [],
       books: [],
       rentals: [],
@@ -135,31 +147,31 @@ export default {
       this.PubList();
     },
 
-     async RentalList() {
-     await Rental.listDash().then((response) => {
+    async RentalList() {
+      await Rental.listDash().then((response) => {
         this.rentals = response.data.data;
-         this.rentals.sort((a, b) => b.id - a.id);
-          if (this.rentals.length > 0) {
-      this.ultimoLivroAlugado = this.rentals[0]; 
-      this.ultimoUsuarioAlugou = this.ultimoLivroAlugado.user.name; 
-    } else {
-      this.ultimoLivroAlugado = null; 
-      this.ultimoUsuarioAlugou = null; 
-    }
+        this.rentals.sort((a, b) => b.id - a.id);
+        if (this.rentals.length > 0) {
+          this.lastBookRented = this.rentals[0];
+          this.lastUserRented = this.lastBookRented.user.name;
+        } else {
+          this.lastBookRented = null;
+          this.lastUserRented = null;
+        }
         this.lists.find((item) => item.title === "Alugueis").count =
           this.rentals.length;
       });
     },
- 
-   async BookList() {
-     await Book.listDash().then((response) => {
+
+    async BookList() {
+      await Book.listDash().then((response) => {
         this.books = response.data.data;
         this.lists.find((item) => item.title === "Livros").count =
           this.books.length;
       });
     },
-   async UserList() {
-     await User.listDash().then((response) => {
+    async UserList() {
+      await User.listDash().then((response) => {
         this.users = response.data.data;
         this.lists.find((item) => item.title === "Usuários").count =
           this.users.length;
@@ -280,4 +292,3 @@ export default {
   }
 }
 </style>
-

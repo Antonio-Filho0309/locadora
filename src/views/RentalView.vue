@@ -31,7 +31,7 @@
       }"
     >
       <template v-slot:[`item.rentalDate`]="{ item }">
-        <td>{{ item.rentalDate  }}</td>
+        <td>{{ item.rentalDate }}</td>
       </template>
       <template v-slot:[`item.previewDate`]="{ item }">
         <td>{{ item.previewDate }}</td>
@@ -240,7 +240,7 @@ export default {
       this.list();
     },
 
-      formatDate(dateString) {
+    formatDate(dateString) {
       const utcDate = new Date(dateString);
       const localDate = new Date(
         utcDate.getTime() + utcDate.getTimezoneOffset() * 60000
@@ -322,9 +322,11 @@ export default {
           Desc: this.desc,
           Search: this.search,
         });
-        this.rentals = response.data.data;
-        this.total = response.data.totalRegisters;
-        
+
+        if(response.data) {
+        this.rentals = response.data.data || [];
+        this.total = response.data.totalRegisters || 0;
+
         this.rentals.forEach((rental) => {
           rental.previewDate = this.formatDate(rental.previewDate);
           rental.rentalDate = this.formatDate(rental.rentalDate);
@@ -332,10 +334,13 @@ export default {
             ? this.formatDate(rental.returnDate)
             : null;
         });
-
+        } else {
+          this.rentals = [];
+          this.total = 0;
+        }
       } catch (error) {
-        console.log("Erro ao Listar: ", error);
-        if (error.response.status == 404) {
+        console.log(error);
+        if (error.response.status == 404 || error.response.status == error)  {
           this.rentals = [];
           console.log(error.response.data.message);
         }
