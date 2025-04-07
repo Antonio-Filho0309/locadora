@@ -3,7 +3,11 @@ Este é o projeto de Back-end da aplicação de Locadora de Livros, desenvolvido
 
 **Tecnologias Utilizadas**
 -C#
+
 -ASP.NET Core
+
 -Entity Framework Core
+
 -SQL Server (ou outro banco de dados)
+
 -Swagger (para documentação da API)
