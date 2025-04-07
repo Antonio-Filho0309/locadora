@@ -3,6 +3,7 @@ Este é o projeto de Back-end da aplicação de Locadora de Livros, desenvolvido
 
 **Tecnologias Utilizadas**
 
+
 -C#
 
 -ASP.NET Core
